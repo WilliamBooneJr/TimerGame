@@ -15,16 +15,23 @@ var exitY = 50;
 var mouseShapeX;
 var mouseShapeY;
 
+var obstacleAdded = false;
+
+var gameStarted = false;
+var gameTimer = 60;
+
 function setup()
 {
     createCanvas(800, 600);
     createCharacter(400,550);
     drawBorders(7);
-    createObstacles(4);
+    createObstacles(7);
 }
+
 
 function draw()
 {
+    obstacleAdded = false;
     background("grey");
     stroke(0);
     fill(0);
@@ -35,7 +42,6 @@ function draw()
     moveObstacles();
     drawExit();
     displayWinMessage();
-    mouseClicked();
 }
     
     
@@ -57,19 +63,19 @@ function moveCharacter()
     
     if(keyIsDown(up))
     {
-        characterY -= 10;   
+        characterY -= 5;   
     }
     if(keyIsDown(down))
     {
-        characterY += 10;   
+        characterY += 5;   
     }
     if(keyIsDown(left))
     {
-        characterX -= 10;   
+        characterX -= 5;   
     }
     if(keyIsDown(right))
     {
-        characterX += 10;   
+        characterX += 5;   
     }
 }
 
@@ -79,12 +85,12 @@ function createObstacles(numObstacles)
     {
         var obstacle = 
         {
-          x: Math.random(width),
-          y: Math.random(height),
-          size: Math.random(10, 50),
-          color: color(Math.random(255), Math.random(255), Math.random(255)),
-          speedX: Math.random(-5, 5),
-          speedY: Math.random(-5, 5)
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: Math.random() * (50 - 10) + 10,
+            color: color(Math.random() * 255, Math.random() * 255, Math.random() * 255),
+            speedX: Math.random() * (5 - (-5)) + (-5),
+            speedY: Math.random() * (5 - (-5)) + (-5)
         };
         obstacles.push(obstacle);
     }
@@ -144,16 +150,20 @@ function drawExit()
 
 function mouseClicked() 
 {
-    var obstacle = 
-    {
-      x: mouseX,
-      y: mouseY,
-      size: random(10, 50),
-      color: color(random(255), random(255), random(255)),
-      speedX: random(-5, 5),
-      speedY: random(-5, 5)
-    };
-    obstacles.push(obstacle);
+   if (!obstacleAdded) 
+   { 
+        var obstacle = 
+        {
+          x: mouseX,
+          y: mouseY,
+          size: random(10, 50),
+          color: color(random(255), random(255), random(255)),
+          speedX: random(-5, 5),
+          speedY: random(-5, 5)
+        };
+        obstacles.push(obstacle);
+        obstacleAdded = true; 
+    }
 }
   
 function displayWinMessage() 
@@ -167,4 +177,56 @@ function displayWinMessage()
       text("You Win!", width / 2, height / 2);
     }
 }
+function checkCollision()
+{
+  for(var i = 0; i < obstacles.length; i++)
+  {
+    var obstacle = obstacles[i];
+    var distance = dist(characterX, characterY, obstacle.x, obstacle.y);
+    if(distance < (obstacle.size/2 + 50))
+    {
+
+      return true;
+    }
+  }
+  return false;
+}
+
+function displayTime()
+{
+  textSize(32);
+  fill(0);
+  text("Time: " + Math.floor((gameTimer - (millis() - startTime))/1000), 10, 50);
+}
+
+function displayGameOver()
+{
+  textSize(40);
+  fill(0);
+  text("Game Over", width/2, height/2);
+}
+
+function restartGame()
+{
+  obstacles = [];
+  createObstacles(7);
+  startTime = millis();
+  gameOver = false;
+}
+
+function checkWin()
+{
+  if(millis() - startTime >= gameTimer){
+    for(var i = 0; i < obstacles.length; i++){
+      var obstacle = obstacles[i];
+      var distance = dist(characterX, characterY, obstacle.x, obstacle.y);
+      if(distance < (obstacle.size/2 + 50)){
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
   
