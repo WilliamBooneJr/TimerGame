@@ -1,6 +1,7 @@
 
 var characterX = 100;
 var characterY = 100;
+var gameOver = false;
 
 var left = 37; 
 var up = 38;
@@ -12,37 +13,76 @@ var obstacles = [];
 var exitX = 700;
 var exitY = 50;
 
+var frameRate = 30;
+
 var mouseShapeX;
 var mouseShapeY;
 
-var obstacleAdded = false;
+
+var timeLimit = 60;
+
+var gameTimer = timeLimit;
+
 
 var gameStarted = false;
-var gameTimer = 60;
+var startTime;
 
 function setup()
 {
+    frameRate(30);
     createCanvas(800, 600);
     createCharacter(400,550);
     drawBorders(7);
     createObstacles(7);
+    startTime = millis();
+    draw();
 }
 
 
 function draw()
 {
-    obstacleAdded = false;
-    background("grey");
-    stroke(0);
-    fill(0);
+  background("grey");
+  stroke(0);
+  fill(0);
+
+    if (gameStarted) 
+    {
+      if (checkCollision())
+    {
+      gameOver = true;
+    }
+    else if (floor(gameTimer) <= 0 || gameOver)
+    {
+    // game over, display "you win" message
+    if (!gameOver){
+      displayWinMessage();
+    }
+    else{
+      displayGameOver();
+    }
     
+    location.reload();
+    }
+    
+    // decrement the game timer
+    gameTimer -= 1/30;
+
+    fill(255);
+    textSize(24);
+    }
+
+
+    if (!gameStarted){
+      text("Click to Start Game", width / 2, height / 2);
+    }
+
     drawCharacter();
     moveCharacter();
     drawObstacles();
     moveObstacles();
-    drawExit();
-    displayWinMessage();
+    displayTime();
 }
+
     
     
 function createCharacter(x,y)
@@ -55,7 +95,7 @@ function createCharacter(x,y)
 function drawCharacter()
 {
     fill("blue");
-    circle(characterX,characterY,100);
+    square(characterX,characterY,40);
 }
 
 function moveCharacter()
@@ -63,19 +103,19 @@ function moveCharacter()
     
     if(keyIsDown(up))
     {
-        characterY -= 5;   
+        characterY -= 7;   
     }
     if(keyIsDown(down))
     {
-        characterY += 5;   
+        characterY += 7;   
     }
     if(keyIsDown(left))
     {
-        characterX -= 5;   
+        characterX -= 7;   
     }
     if(keyIsDown(right))
     {
-        characterX += 5;   
+        characterX += 7;   
     }
 }
 
@@ -89,8 +129,8 @@ function createObstacles(numObstacles)
             y: Math.random() * height,
             size: Math.random() * (50 - 10) + 10,
             color: color(Math.random() * 255, Math.random() * 255, Math.random() * 255),
-            speedX: Math.random() * (5 - (-5)) + (-5),
-            speedY: Math.random() * (5 - (-5)) + (-5)
+            speedX: Math.floor(Math.random() * 12),
+            speedY: Math.floor(Math.random() * 12),
         };
         obstacles.push(obstacle);
     }
@@ -142,40 +182,14 @@ function drawBorders()
     line(width, 0, width, height - 50);
 }
 
-function drawExit() 
-{
-    textSize(16);
-    text("EXIT", exitX, exitY);
-}
-
-function mouseClicked() 
-{
-   if (!obstacleAdded) 
-   { 
-        var obstacle = 
-        {
-          x: mouseX,
-          y: mouseY,
-          size: random(10, 50),
-          color: color(random(255), random(255), random(255)),
-          speedX: random(-5, 5),
-          speedY: random(-5, 5)
-        };
-        obstacles.push(obstacle);
-        obstacleAdded = true; 
-    }
-}
   
 function displayWinMessage() 
 {
-    if (characterX > width && characterY <= 50) 
-    {
-      fill(0);
-      stroke(5);
-      textSize(40);
-      textAlign(CENTER);
-      text("You Win!", width / 2, height / 2);
-    }
+  fill(0);
+  stroke(5);
+  textSize(40);
+  textAlign(CENTER);
+  text("You Win!", width / 2, height / 2);
 }
 function checkCollision()
 {
@@ -183,7 +197,7 @@ function checkCollision()
   {
     var obstacle = obstacles[i];
     var distance = dist(characterX, characterY, obstacle.x, obstacle.y);
-    if(distance < (obstacle.size/2 + 50))
+    if(distance < (obstacle.size))
     {
 
       return true;
@@ -192,11 +206,11 @@ function checkCollision()
   return false;
 }
 
-function displayTime()
+function displayTime() 
 {
   textSize(32);
   fill(0);
-  text("Time: " + Math.floor((gameTimer - (millis() - startTime))/1000), 10, 50);
+  text("Time: " + floor(gameTimer), 10, 50);
 }
 
 function displayGameOver()
@@ -206,27 +220,12 @@ function displayGameOver()
   text("Game Over", width/2, height/2);
 }
 
-function restartGame()
-{
-  obstacles = [];
-  createObstacles(7);
-  startTime = millis();
-  gameOver = false;
-}
 
-function checkWin()
+function mouseClicked() 
 {
-  if(millis() - startTime >= gameTimer){
-    for(var i = 0; i < obstacles.length; i++){
-      var obstacle = obstacles[i];
-      var distance = dist(characterX, characterY, obstacle.x, obstacle.y);
-      if(distance < (obstacle.size/2 + 50)){
-        return false;
-      }
-    }
-    return true;
+  if (!gameStarted) 
+  {
+    gameStarted = true;
+    gameTimer = timeLimit; // reset the timer
   }
-  return false;
 }
-
-  
