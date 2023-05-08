@@ -19,7 +19,7 @@ var mouseShapeX;
 var mouseShapeY;
 
 
-var timeLimit = 60;
+var timeLimit = 30;
 
 var gameTimer = timeLimit;
 
@@ -54,7 +54,11 @@ function draw()
     else if (floor(gameTimer) <= 0 || gameOver)
     {
     // game over, display "you win" message
-    if (!gameOver){
+    if (!gameOver)
+    {
+      for (var i = 0; i <= 1100; i++)
+      displayWinMessage();
+      displayWinMessage();
       displayWinMessage();
     }
     else{
@@ -72,7 +76,9 @@ function draw()
     }
 
 
-    if (!gameStarted){
+    if (!gameStarted)
+    {
+      gameInstructions();
       text("Click to Start Game", width / 2, height / 2);
     }
 
@@ -129,8 +135,8 @@ function createObstacles(numObstacles)
             y: Math.random() * height,
             size: Math.random() * (50 - 10) + 10,
             color: color(Math.random() * 255, Math.random() * 255, Math.random() * 255),
-            speedX: Math.floor(Math.random() * 12),
-            speedY: Math.floor(Math.random() * 12),
+            speedX: Math.floor(Math.random() * 13),
+            speedY: Math.floor(Math.random() * 13),
         };
         obstacles.push(obstacle);
     }
@@ -185,11 +191,13 @@ function drawBorders()
   
 function displayWinMessage() 
 {
-  fill(0);
-  stroke(5);
-  textSize(40);
+  
+  stroke(0);
+  fill(255, 215, 0);
+  textSize(100);
   textAlign(CENTER);
-  text("You Win!", width / 2, height / 2);
+  text("YOU WIN!", width / 2, height / 2);
+  fill(255, 215, 0);
 }
 function checkCollision()
 {
@@ -228,4 +236,13 @@ function mouseClicked()
     gameStarted = true;
     gameTimer = timeLimit; // reset the timer
   }
+}
+function gameInstructions()
+{
+  textSize(25);
+  fill(0);
+  strokeWeight(2);
+  text("-Dodge all obstacles for 30s to win-", width/3, height/3);
+
+
 }
